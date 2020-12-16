@@ -290,8 +290,20 @@ export class NewRun extends Page<{ namespace?: string }, NewRunState> {
                 {...this.props}
                 title='Choose a pipeline'
                 filterLabel='Filter pipelines'
-                listApi={async (...args) => {
-                  const response = await Apis.pipelineServiceApi.listPipelines(...args);
+                listApi={async (
+                  page_token?: string,
+                  page_size?: number,
+                  sort_by?: string,
+                  filter?: string,
+                ) => {
+                  const response = await Apis.pipelineServiceApi.listPipelines(
+                    page_token,
+                    page_size,
+                    sort_by,
+                    filter,
+                    this.props.namespace ? 'NAMESPACE' : undefined,
+                    this.props.namespace,
+                  );
                   return {
                     nextPageToken: response.next_page_token || '',
                     resources: response.pipelines || [],
@@ -872,8 +884,12 @@ export class NewRun extends Page<{ namespace?: string }, NewRunState> {
     try {
       const uploadedPipeline =
         method === ImportMethod.LOCAL
-          ? await Apis.uploadPipeline(name, description || '', file!)
-          : await Apis.pipelineServiceApi.createPipeline({ name, url: { pipeline_url: url } });
+          ? await Apis.uploadPipeline(name, description || '', file!, this.props.namespace)
+          : await Apis.pipelineServiceApi.createPipeline({
+              name,
+              url: { pipeline_url: url },
+              namespace: this.props.namespace,
+            });
       this.setStateSafe(
         {
           pipeline: uploadedPipeline,
