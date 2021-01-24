@@ -41,7 +41,7 @@ import { Description } from '../components/Description';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import { ExternalLink } from '../atoms/ExternalLink';
-import { Checkbox } from '@material-ui/core';
+// import { Checkbox } from '@material-ui/core';
 import { NamespaceContext } from 'src/lib/KubeflowClient';
 
 interface NewPipelineVersionState {
@@ -297,7 +297,7 @@ export class NewPipelineVersion extends Page<{ namespace?: string }, NewPipeline
                         sort_by,
                         filter,
                         this.props.namespace ? 'NAMESPACE' : undefined,
-                        this.props.namespace,
+                        "",
                       );
                       return {
                         nextPageToken: response.next_page_token || '',
@@ -550,7 +550,7 @@ export class NewPipelineVersion extends Page<{ namespace?: string }, NewPipeline
                   this.state.pipelineName!,
                   this.state.pipelineDescription,
                   this.state.file!,
-                  this.props.namespace,
+                  "",
                 )
               ).default_version!
             : this.state.newPipeline && this.state.importMethod === ImportMethod.URL
@@ -559,7 +559,7 @@ export class NewPipelineVersion extends Page<{ namespace?: string }, NewPipeline
                   description: this.state.pipelineDescription,
                   name: this.state.pipelineName!,
                   url: { pipeline_url: this.state.packageUrl },
-                  namespace: this.props.namespace,
+                  namespace: "",
                 })
               ).default_version!
             : await this._createPipelineVersion();
@@ -598,7 +598,7 @@ export class NewPipelineVersion extends Page<{ namespace?: string }, NewPipeline
           description: this.state.pipelineDescription,
           name: this.state.pipelineName,
           url: { pipeline_url: this.state.packageUrl },
-          namespace: this.props.namespace,
+          namespace: "",
         };
         const response = await Apis.pipelineServiceApi.createPipeline(newPipeline);
         return response.id!;

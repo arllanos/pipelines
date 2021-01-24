@@ -200,9 +200,6 @@ func (s *PipelineServer) ListPipelines(ctx context.Context, request *api.ListPip
 			return nil, util.NewInvalidInputError("Invalid resource references for pipelines. ListPipelineVersions requires filtering by namespace.")
 		}
 		namespace := refKey.ID
-		if len(namespace) == 0 {
-			return nil, util.NewInvalidInputError("Invalid resource references for pipelines. Namespace is empty.")
-		}
 		resourceAttributes := &authorizationv1.ResourceAttributes{
 			Namespace: namespace,
 			Verb:      common.RbacResourceVerbList,
@@ -452,6 +449,9 @@ func (s *PipelineServer) CanAccessPipelineVersion(ctx context.Context, versionId
 		}
 		resourceAttributes.Namespace = namespace
 	}
+	if resourceAttributes.Namespace == "" {
+		return nil
+	}
 	resourceAttributes.Group = common.RbacPipelinesGroup
 	resourceAttributes.Version = common.RbacPipelinesVersion
 	resourceAttributes.Resource = common.RbacResourceTypePipelines
@@ -476,6 +476,9 @@ func (s *PipelineServer) CanAccessPipeline(ctx context.Context, pipelineId strin
 			return util.Wrap(err, "Failed to authorize with the Pipeline ID.")
 		}
 		resourceAttributes.Namespace = namespace
+	}
+	if resourceAttributes.Namespace == "" {
+		return nil
 	}
 	resourceAttributes.Group = common.RbacPipelinesGroup
 	resourceAttributes.Version = common.RbacPipelinesVersion

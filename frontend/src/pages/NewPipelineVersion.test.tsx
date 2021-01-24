@@ -307,6 +307,7 @@ describe('NewPipelineVersion', () => {
       expect(createPipelineSpy).toHaveBeenLastCalledWith({
         description: 'test pipeline description',
         name: 'test pipeline name',
+        namespace: "",
         url: {
           pipeline_url: 'https://dummy_package_url',
         },
@@ -336,7 +337,7 @@ describe('NewPipelineVersion', () => {
         'test pipeline name',
         'test pipeline description',
         file,
-        undefined,
+        "",
       );
       expect(createPipelineSpy).not.toHaveBeenCalled();
     });

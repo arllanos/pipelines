@@ -178,7 +178,7 @@ export class PipelineList extends Page<{ namespace?: string }, PipelineListState
         request.sortBy,
         request.filter,
         this.props.namespace ? 'NAMESPACE' : undefined,
-        this.props.namespace || undefined,
+        "",
       );
       displayPipelines = response.pipelines || [];
       displayPipelines.forEach(exp => (exp.expandState = ExpandState.COLLAPSED));
@@ -254,7 +254,7 @@ export class PipelineList extends Page<{ namespace?: string }, PipelineListState
         : await Apis.pipelineServiceApi.createPipeline({
             name,
             url: { pipeline_url: url },
-            namespace: this.props.namespace,
+            namespace: "",
           });
       this.setStateSafe({ uploadDialogOpen: false });
       this.refresh();
