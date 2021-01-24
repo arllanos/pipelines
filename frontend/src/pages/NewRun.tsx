@@ -302,7 +302,7 @@ export class NewRun extends Page<{ namespace?: string }, NewRunState> {
                     sort_by,
                     filter,
                     this.props.namespace ? 'NAMESPACE' : undefined,
-                    this.props.namespace,
+                    '',
                   );
                   return {
                     nextPageToken: response.next_page_token || '',
@@ -884,11 +884,11 @@ export class NewRun extends Page<{ namespace?: string }, NewRunState> {
     try {
       const uploadedPipeline =
         method === ImportMethod.LOCAL
-          ? await Apis.uploadPipeline(name, description || '', file!, this.props.namespace)
+          ? await Apis.uploadPipeline(name, description || '', file!, '')
           : await Apis.pipelineServiceApi.createPipeline({
               name,
               url: { pipeline_url: url },
-              namespace: this.props.namespace,
+              namespace: '',
             });
       this.setStateSafe(
         {
