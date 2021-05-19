@@ -21,10 +21,10 @@ import {
   ArtifactCustomProperties,
   ListRequest,
   ArtifactType,
-  getArtifactCreationTime,
   getArtifactTypes,
   getResourcePropertyViaFallBack,
   GetArtifactsRequest,
+  ListOperationOptions,
 } from '@kubeflow/frontend';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
@@ -48,6 +48,7 @@ import {
 } from '../lib/Utils';
 import { RoutePageFactory } from '../components/Router';
 import { ArtifactLink } from '../components/ArtifactLink';
+import { formatDateString } from '../lib/Utils';
 
 interface ArtifactListState {
   artifacts: Artifact[];
@@ -139,7 +140,7 @@ export class ArtifactList extends Page<{}, ArtifactListState> {
       );
     }
     if (!this.state.artifacts.length) {
-      const artifacts = await this.getArtifacts();
+      const artifacts = await this.getArtifacts(request);
       this.clearBanner();
       const collapsedAndExpandedRows = await this.getRowsFromArtifacts(request, artifacts);
       if (collapsedAndExpandedRows) {
@@ -171,9 +172,14 @@ export class ArtifactList extends Page<{}, ArtifactListState> {
     <ArtifactLink artifactUri={value} />
   );
 
-  private async getArtifacts(): Promise<Artifact[]> {
+  private async getArtifacts(request: ListRequest): Promise<Artifact[]> {
     try {
-      const response = await this.api.metadataStoreService.getArtifacts(new GetArtifactsRequest());
+      const artifactRequest = new GetArtifactsRequest()
+      const opts = new ListOperationOptions()
+      const pageSize = request.pageSize as number || 50
+      opts.setMaxResultSize(pageSize)
+      artifactRequest.setOptions(opts)
+      const response = await this.api.metadataStoreService.getArtifacts(artifactRequest);
       return response.getArtifactsList();
     } catch (err) {
       // Code === 5 means no record found in backend. This is a temporary workaround.
@@ -197,25 +203,9 @@ export class ArtifactList extends Page<{}, ArtifactListState> {
     artifacts: Artifact[],
   ): Promise<CollapsedAndExpandedRows | undefined> {
     try {
-      // TODO: When backend supports sending creation time back when we list
-      // artifacts, let's use it directly.
-      const artifactsWithCreationTimes = await Promise.all(
-        artifacts.map(async artifact => {
-          const artifactId = artifact.getId();
-          if (!artifactId) {
-            return { artifact };
-          }
-
-          return {
-            artifact,
-            creationTime: await getArtifactCreationTime(artifactId, this.api.metadataStoreService),
-          };
-        }),
-      );
-
       return groupRows(
-        artifactsWithCreationTimes
-          .map(({ artifact, creationTime }) => {
+        artifacts
+          .map((artifact) => {
             const typeId = artifact.getTypeId();
             const artifactType = this.artifactTypesMap!.get(typeId);
             const type = artifactType ? artifactType.getName() : artifact.getTypeId();
@@ -231,7 +221,7 @@ export class ArtifactList extends Page<{}, ArtifactListState> {
                 artifact.getId(),
                 type,
                 artifact.getUri(),
-                creationTime || '',
+                formatDateString(new Date(artifact.getCreateTimeSinceEpoch())),
               ],
             } as Row;
           })
