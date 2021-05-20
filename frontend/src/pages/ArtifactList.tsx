@@ -174,11 +174,15 @@ export class ArtifactList extends Page<{}, ArtifactListState> {
 
   private async getArtifacts(request: ListRequest): Promise<Artifact[]> {
     try {
-      const artifactRequest = new GetArtifactsRequest()
-      const opts = new ListOperationOptions()
-      const pageSize = request.pageSize as number || 50
-      opts.setMaxResultSize(pageSize)
-      artifactRequest.setOptions(opts)
+      // prepare artifactRequest with a sort column and max result size
+      const artifactRequest = new GetArtifactsRequest();
+      const orderByField = new ListOperationOptions.OrderByField()
+      const opts = new ListOperationOptions();
+      orderByField.setField(ListOperationOptions.OrderByField.Field.CREATE_TIME)
+      orderByField.setIsAsc(false)
+      opts.setMaxResultSize(30 || request.pageSize as number);
+      opts.setOrderByField(orderByField)
+      artifactRequest.setOptions(opts);
       const response = await this.api.metadataStoreService.getArtifacts(artifactRequest);
       return response.getArtifactsList();
     } catch (err) {
